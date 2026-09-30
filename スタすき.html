@@ -1,0 +1,707 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>スタすき</title>
+<style>
+/* Layout concept: a "daily planner" page — a faint ruled/grid ground like a notebook,
+   a single timetable motif running through the hero and section dividers,
+   generous margins like a notebook's own gutter. */
+:root{
+  --bg:#f7f3ea;
+  --paper:#fffdf7;
+  --ink:#2b2620;
+  --ink-soft:#5c5548;
+  --line:#ddd4c2;
+  --accent:#c25b2e;
+  --accent-soft:#e8c9ab;
+  --accent-ink:#fff8f1;
+  --s1:#c25b2e; --s2:#0a8a7a; --s3:#c99a3c; --s4:#7a4fa0; --s5:#3f8f3f; --s6:#2f5fa8; --s7:#a85c6e;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#211d18;
+    --paper:#2a2520;
+    --ink:#f3ede1;
+    --ink-soft:#b8ae9c;
+    --line:#4a4235;
+    --accent:#e08249;
+    --accent-soft:#5a3a26;
+    --accent-ink:#221407;
+    color-scheme:dark;
+    --s1:#d97440; --s2:#0f9a8a; --s3:#b98a3c; --s4:#9670c0; --s5:#5aa34a; --s6:#5484c4; --s7:#c06f88;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#211d18;
+  --paper:#2a2520;
+  --ink:#f3ede1;
+  --ink-soft:#b8ae9c;
+  --line:#4a4235;
+  --accent:#e08249;
+  --accent-soft:#5a3a26;
+  --accent-ink:#221407;
+  color-scheme:dark;
+  --s1:#d97440; --s2:#0f9a8a; --s3:#b98a3c; --s4:#9670c0; --s5:#5aa34a; --s6:#5484c4; --s7:#c06f88;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Sans",sans-serif;
+  padding:0 20px;
+}
+a{color:var(--accent)}
+
+.wrap{max-width:760px;margin:0 auto}
+
+header.site{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-block:22px 8px;
+}
+.brand{
+  font-family:"Shippori Mincho",serif;
+  font-size:1.15rem;
+  font-weight:600;
+  letter-spacing:.04em;
+}
+.brand span{color:var(--accent)}
+
+/* Hero */
+.hero{
+  padding-block:56px 40px;
+}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.78rem;letter-spacing:.12em;color:var(--ink-soft);
+  border:1px solid var(--line);border-radius:99px;
+  padding:5px 14px;margin-bottom:22px;
+  background:var(--paper);
+}
+h1.hero-line{
+  font-family:"Shippori Mincho",serif;
+  font-weight:700;
+  font-size:clamp(1.7rem,5vw,2.5rem);
+  line-height:1.55;
+  text-wrap:balance;
+  margin:0 0 20px;
+}
+h1.hero-line em{
+  font-style:normal;
+  color:var(--accent);
+  box-shadow:inset 0 -0.32em 0 var(--accent-soft);
+}
+.hero p.sub{
+  font-size:1.02rem;
+  line-height:2;
+  color:var(--ink-soft);
+  max-width:52ch;
+  margin:0 0 30px;
+}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.95rem;font-weight:600;
+  padding:13px 24px;border-radius:8px;
+  text-decoration:none;
+  border:1px solid transparent;
+}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{border-color:var(--line);color:var(--ink);background:var(--paper)}
+
+/* Timetable strip motif */
+.timestrip{
+  display:flex;
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:44px;
+  background:var(--paper);
+  font-size:.72rem;
+}
+.timestrip > div{
+  flex:1;
+  padding:14px 8px 12px;
+  border-left:1px solid var(--line);
+  min-width:0;
+}
+.timestrip > div:first-child{border-left:none}
+.timestrip .t{color:var(--ink-soft);letter-spacing:.03em;display:block;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.timestrip .label{color:var(--ink);font-weight:600;line-height:1.4}
+.timestrip .accentcell{background:var(--accent-soft)}
+
+/* Section shell */
+section{padding-block:52px;border-top:1px solid var(--line)}
+.kicker{
+  font-size:.78rem;letter-spacing:.14em;color:var(--accent);
+  font-weight:700;margin-bottom:10px;
+}
+h2{
+  font-family:"Shippori Mincho",serif;
+  font-size:clamp(1.35rem,3.6vw,1.7rem);
+  margin:0 0 22px;
+  text-wrap:balance;
+}
+
+/* Daily schedule donut */
+.day-wrap{
+  display:flex;gap:32px;align-items:center;flex-wrap:wrap;
+}
+.day-chart{position:relative;flex:0 0 auto;width:220px;height:220px}
+.day-chart svg{width:100%;height:100%;display:block}
+.day-chart .center-label{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;pointer-events:none;
+}
+.day-chart .center-label .big{
+  font-family:"Shippori Mincho",serif;font-weight:700;
+  font-size:1.5rem;color:var(--ink);line-height:1.15;
+  font-variant-numeric:tabular-nums;
+}
+.day-chart .center-label .small{font-size:.72rem;color:var(--ink-soft);margin-top:2px}
+.day-legend{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:0}
+.day-legend .row{
+  display:flex;align-items:baseline;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--line);
+  font-size:.88rem;
+}
+.day-legend .row:last-child{border-bottom:none}
+.day-legend .swatch{
+  width:11px;height:11px;border-radius:3px;flex:0 0 auto;
+  margin-top:3px;
+}
+.day-legend .name{color:var(--ink);font-weight:600;flex:0 0 auto}
+.day-legend .time{color:var(--ink-soft);font-size:.78rem;flex:1 1 auto;min-width:0}
+.day-legend .dur{
+  color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;
+  flex:0 0 auto;font-size:.85rem;
+}
+.day-note{
+  margin-top:18px;font-size:.85rem;color:var(--ink-soft);line-height:1.9;
+}
+@media (max-width:480px){
+  .day-wrap{flex-direction:column;align-items:flex-start}
+}
+
+/* Philosophy */
+.philosophy{
+  border-left:3px solid var(--accent);
+  padding:4px 0 4px 26px;
+}
+.philosophy p{
+  font-family:"Shippori Mincho",serif;
+  font-size:clamp(1.1rem,3vw,1.35rem);
+  line-height:2.15;
+  color:var(--ink);
+  margin:0 0 18px;
+  text-wrap:balance;
+}
+.philosophy p:last-of-type{margin-bottom:0}
+.philosophy .credo{
+  margin-top:24px;
+  font-family:"Zen Kaku Gothic New",sans-serif;
+  font-size:.85rem;
+  color:var(--ink-soft);
+  letter-spacing:.02em;
+}
+.philosophy .credo b{color:var(--accent);font-weight:700}
+
+/* Hensachi line chart */
+.hensachi-chart{width:100%}
+.hensachi-chart svg{width:100%;height:auto;display:block;overflow:visible}
+.hensachi-chart .grid-line{stroke:var(--line);stroke-width:1}
+.hensachi-chart .axis-label{fill:var(--ink-soft);font-size:9px;font-family:"Zen Kaku Gothic New",sans-serif}
+.hensachi-chart .year-label{fill:var(--ink-soft);font-size:9.5px;font-weight:700;letter-spacing:.04em;font-family:"Zen Kaku Gothic New",sans-serif}
+.hensachi-chart .line-path{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.hensachi-chart .pt{fill:var(--paper);stroke:var(--accent);stroke-width:2.5}
+.hensachi-chart .pt-callout{fill:var(--accent)}
+.hensachi-chart .val-label{fill:var(--ink);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;font-family:"Shippori Mincho",serif}
+.hensachi-note{margin-top:14px;font-size:.85rem;color:var(--ink-soft);line-height:1.9}
+
+/* About */
+.about-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:28px 26px;
+}
+.about-card p{line-height:2;color:var(--ink-soft);margin:0 0 16px}
+.about-card p:last-child{margin-bottom:0}
+.about-card strong{color:var(--ink)}
+
+.stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-top:22px;
+}
+.stat{
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  padding:16px 14px;min-width:0;
+}
+.stat .num{
+  font-family:"Shippori Mincho",serif;
+  font-size:1.5rem;font-weight:700;color:var(--accent);
+  display:block;line-height:1.2;
+}
+.stat .cap{font-size:.75rem;color:var(--ink-soft);margin-top:4px;line-height:1.5}
+
+/* Services */
+.service{
+  display:grid;grid-template-columns:1fr;gap:16px;
+}
+.service-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:24px;display:flex;flex-direction:column;gap:10px;min-width:0;
+}
+.service-card .tag{
+  align-self:flex-start;
+  font-size:.7rem;font-weight:700;letter-spacing:.06em;
+  padding:4px 10px;border-radius:99px;
+}
+.tag.live{background:var(--accent);color:var(--accent-ink)}
+.tag.soon{background:transparent;border:1px solid var(--line);color:var(--ink-soft)}
+.service-card h3{
+  font-family:"Shippori Mincho",serif;
+  font-size:1.15rem;margin:2px 0 0;
+}
+.service-card p{color:var(--ink-soft);line-height:1.9;margin:0;font-size:.94rem}
+.service-card .price{
+  margin-top:auto;padding-top:10px;font-size:.85rem;color:var(--ink-soft);
+  border-top:1px dashed var(--line);
+}
+.service-card .price b{color:var(--ink);font-size:1.05rem}
+
+/* Voice / testimonials */
+.voice-empty{
+  background:var(--paper);border:1px dashed var(--line);border-radius:14px;
+  padding:34px 26px;text-align:center;color:var(--ink-soft);
+  font-size:.92rem;line-height:1.9;
+}
+
+/* Contact */
+.contact-card{
+  background:var(--accent);color:var(--accent-ink);
+  border-radius:16px;padding:32px 26px;
+}
+.contact-card h2{color:var(--accent-ink)}
+.contact-card p{line-height:1.9;opacity:.92;margin:0 0 22px;max-width:48ch}
+.contact-card .btn.primary{background:var(--accent-ink);color:var(--accent)}
+
+footer{
+  padding-block:30px 44px;color:var(--ink-soft);font-size:.78rem;
+  text-align:center;
+}
+
+@media (max-width:480px){
+  .stats{grid-template-columns:1fr 1fr}
+  .timestrip{font-size:.62rem;flex-wrap:wrap}
+  .timestrip > div{flex:1 1 33%;border-left:none;border-top:1px solid var(--line)}
+}
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="wrap">
+
+  <header class="site">
+    <div class="brand">スタ<span>すき</span></div>
+  </header>
+
+  <section class="hero" style="border-top:none;padding-top:0">
+    <span class="eyebrow">部活動生のための短時間学習メソッド</span>
+    <h1 class="hero-line">その大変さを、<em>誰よりも知っている</em>から。</h1>
+    <p class="sub">
+      部活を本気でやりながら結果を出したい人のための、短時間学習メソッド。
+      長く勉強することが手段ではありません。限られた時間を、どう配分するか。
+      偏差値を上げることがゴールではなく、部活を本気でやりながら
+      結果を出せるようになることがゴールです。
+    </p>
+    <div class="cta-row">
+      <a class="btn primary" href="https://note.com/start_up699/portal">ノートを読む</a>
+      <a class="btn ghost" href="#about">実績・プロフィールを見る</a>
+    </div>
+
+    <div class="timestrip" aria-hidden="true">
+      <div><span class="t">6:00</span><span class="label">朝の暗記タイム</span></div>
+      <div><span class="t">8:00-16:00</span><span class="label">授業・部活動</span></div>
+      <div class="accentcell"><span class="t">20:00</span><span class="label">学習タイム</span></div>
+      <div><span class="t">22:00</span><span class="label">就寝</span></div>
+    </div>
+  </section>
+
+  <section id="philosophy">
+    <div class="kicker">PHILOSOPHY</div>
+    <h2>理念</h2>
+    <div class="philosophy">
+      <p>一人一人、環境も、得意不得意も異なります。</p>
+      <p>だからこそ、その子の環境と、思い描く未来に合った勉強の仕方を、一緒に見つけていきたい。</p>
+      <p class="credo"><b>スタすき</b>は、そのような理念にて活動しています。</p>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="kicker">PROFILE</div>
+    <h2>部活と勉強、両方を本気でやってきました。</h2>
+    <div class="about-card">
+      <p>
+        高校3年間、サッカー部で本気で部活動に取り組みながら
+        (県大会優勝3回・準優勝2回・3位2回、九州大会入賞1回)、
+        <strong>偏差値39から70、最高73</strong>まで成績を伸ばし、国立大学に現役合格しました。
+        楽だったわけではありません。何度も心が折れそうになりながら、
+        それでも結果につながる「1日の使い方」を、試行錯誤の末に見つけました。
+      </p>
+      <p>
+        卒業後は5年間、<strong>部活動生限定</strong>で学習設計・伴走をしてきました。
+        指導実績の一つでは、1日の学習時間わずか2時間で、一時45まで落ち込んだ偏差値を
+        高3の7月時点で60まで伸ばしています(現在も指導継続中)。
+        長時間勉強することがすべてではなく、限られた時間をどう設計するかで結果は変わる、
+        という短時間メソッドの証明です(詳しくは下記でご紹介しています)。
+      </p>
+      <p>
+        部活と勉強、両方を本気でやるのがどれだけ大変か、身をもって知っています。
+        だからこそ、部活を頑張るお子さまと、それを見守る保護者の方の気持ちに、
+        他人事ではなく向き合えます。
+      </p>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="num">39→70</span><span class="cap">自身の偏差値推移(最高73・部活動と両立)</span></div>
+      <div class="stat"><span class="num">1日2時間</span><span class="cap">指導実績の一例:偏差値45→60(高1〜高3・指導継続中)</span></div>
+      <div class="stat"><span class="num">5年</span><span class="cap">部活動生限定の指導経験</span></div>
+    </div>
+  </section>
+
+  <section id="schedule">
+    <div class="kicker">MY SCHEDULE</div>
+    <h2>高校時代、実際に過ごしていた1日</h2>
+    <div class="day-wrap">
+      <div class="day-chart">
+        <svg id="dayDonut" viewBox="0 0 200 200" role="img" aria-label="高校時代の1日の時間配分の内訳"></svg>
+        <div class="center-label"><span class="big">24h</span><span class="small">平日1日</span></div>
+      </div>
+      <div class="day-legend" id="dayLegend"></div>
+    </div>
+    <p class="day-note">
+      部活で帰宅は22時、就寝は23時。机に向かえたのは、実質わずかな隙間時間でした。
+      それでも偏差値39から70まで伸ばせたのは、量ではなく「配分」を変えたからです。
+    </p>
+  </section>
+
+  <section id="hensachi">
+    <div class="kicker">TRACK RECORD</div>
+    <h2>偏差値の推移(高1〜高3)</h2>
+    <div class="hensachi-chart">
+      <svg id="hensachiSvg" viewBox="0 0 640 260" role="img" aria-label="高校1年から3年までの偏差値の推移"></svg>
+    </div>
+    <p class="hensachi-note">
+      部活を本気で続けながら、高1の7月に一度39まで落ち込みましたが、
+      そこから高3の7月には最高73、12月には70まで伸ばしました。※4月・7月・12月時点の記録値。
+    </p>
+  </section>
+
+  <section id="service">
+    <div class="kicker">SERVICE</div>
+    <h2>サービス内容</h2>
+    <div class="service">
+      <div class="service-card">
+        <span class="tag live">販売中</span>
+        <h3>有料ノート「1日の設計図」</h3>
+        <p>
+          「どんな未来を描いているか」を言語化するワークから始まり、
+          部活と両立する短時間メソッドのタイムテーブルをテンプレートで手に入れられます。
+          高額な塾や家庭教師を検討する前に、まず試していただきたい一冊です。
+        </p>
+        <div class="price">Noteにて販売中 &middot; <b>詳しくはノートへ</b></div>
+      </div>
+      <div class="service-card">
+        <span class="tag soon">準備中</span>
+        <h3>伴走型サポート</h3>
+        <p>
+          ノートだけでは埋まらない、ご家庭ごとの悩みに継続的に寄り添う伴走サービスです。
+          LINEでの個別サポートや、定期的なビジョン対話セッションを予定しています。
+        </p>
+        <div class="price">近日公開予定</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="voice">
+    <div class="kicker">VOICE</div>
+    <h2>短時間メソッドの証明</h2>
+    <div class="about-card">
+      <p>
+        現在指導している生徒の一人は、高校1年の4月時点で偏差値50でした。
+        同年12月には一度45まで下がりましたが、そこから着実に伸ばし、
+        高校3年の4月に<strong>62</strong>、7月時点でも<strong>60</strong>を記録しています
+        (現在も指導中のため、直近12月の結果はまだ出ていません)。
+        1日の学習時間は平均で<strong>2時間</strong>。長時間机に向かったわけではありません。
+        「限られた時間で、何を、どう配分するか」という設計力があれば、結果は変わる。
+        部活動で毎日3〜4時間を費やす人にとって、机に向かえる時間はさらに限られています。
+        だからこそ、この事実は、部活で時間が取れない人にこそ強い意味を持ちます。
+      </p>
+      <div class="hensachi-chart" style="max-width:420px;margin-top:18px">
+        <svg id="studentHensachiSvg" viewBox="0 0 420 190" role="img" aria-label="指導中の生徒の偏差値の推移(高1〜高3、12月分は指導継続中)"></svg>
+      </div>
+      <p style="font-size:.82rem;margin-top:14px">
+        ※個人の一例であり、学習効果には個人差があります。数値は本人の記録に基づくものです。
+        高3の12月分は現在指導継続中のため未確定です。
+      </p>
+    </div>
+    <div class="voice-empty" style="margin-top:16px">
+      ノートをご利用いただいた方の声は、準備が整い次第こちらに掲載していく予定です。
+    </div>
+  </section>
+
+  <section id="contact" style="border-top:none">
+    <div class="contact-card">
+      <h2>まずはノートから、<br>話すきっかけを。</h2>
+      <p>
+        このノートはあくまで「最初の一歩」です。お子さまと一緒に読んでいただき、
+        今の生活リズムを変えずにできることから試してみてください。
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="https://note.com/start_up699/portal">Noteでノートを見る</a>
+      </div>
+      <p style="margin:22px 0 0;font-size:.88rem;opacity:.92">
+        ご相談は、LINEもしくはInstagramからお気軽にどうぞ。
+      </p>
+      <div class="cta-row" style="margin-top:10px">
+        <a class="btn ghost" style="border-color:var(--accent-ink);color:var(--accent-ink);background:transparent" href="https://www.instagram.com/sutasuki9/">Instagramで相談する</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>スタすき &middot; 部活動生のための短時間学習メソッド</footer>
+
+</div>
+
+<script>
+(function(){
+  // 高校時代の平日スケジュール(社長実績)。開始時刻からの経過分で管理し、24h(1440分)で正規化。
+  var data = [
+    {name:"起床",      start:"5:15",  end:"5:45",  slot:"--s1"},
+    {name:"登校",      start:"5:45",  end:"7:40",  slot:"--s2"},
+    {name:"授業",      start:"7:40",  end:"18:00", slot:"--s3"},
+    {name:"部活動",    start:"18:00", end:"20:30", slot:"--s4"},
+    {name:"下校",      start:"20:30", end:"22:00", slot:"--s5"},
+    {name:"就寝準備",  start:"22:00", end:"23:00", slot:"--s6"},
+    {name:"睡眠",      start:"23:00", end:"5:15",  slot:"--s7"}
+  ];
+  function toMin(t){ var p=t.split(":"); return (+p[0])*60 + (+p[1]); }
+  data.forEach(function(d){
+    var s=toMin(d.start), e=toMin(d.end);
+    if(e<=s) e+=1440; // 日をまたぐ区間(睡眠)
+    d.mins = e-s;
+  });
+  var total = data.reduce(function(a,d){return a+d.mins;},0); // 1440のはず
+
+  var svgNS="http://www.w3.org/2000/svg";
+  var svg=document.getElementById("dayDonut");
+  var cx=100, cy=100, rOuter=92, rInner=58;
+  var cs=getComputedStyle(document.documentElement);
+  var strokeCol = cs.getPropertyValue("--bg").trim() || "#fff";
+
+  function polar(cx,cy,r,angleDeg){
+    var a=(angleDeg-90)*Math.PI/180;
+    return [cx+r*Math.cos(a), cy+r*Math.sin(a)];
+  }
+  function arcPath(cx,cy,rOuter,rInner,a0,a1){
+    var large = (a1-a0) > 180 ? 1 : 0;
+    var p0o=polar(cx,cy,rOuter,a0), p1o=polar(cx,cy,rOuter,a1);
+    var p0i=polar(cx,cy,rInner,a1), p1i=polar(cx,cy,rInner,a0);
+    return [
+      "M", p0o[0], p0o[1],
+      "A", rOuter, rOuter, 0, large, 1, p1o[0], p1o[1],
+      "L", p0i[0], p0i[1],
+      "A", rInner, rInner, 0, large, 0, p1i[0], p1i[1],
+      "Z"
+    ].join(" ");
+  }
+
+  var angle = 0;
+  var legend = document.getElementById("dayLegend");
+  data.forEach(function(d){
+    var sweep = d.mins/total*360;
+    var a0 = angle, a1 = angle + Math.max(sweep - 1.2, 0.5); // わずかな隙間(surfaceギャップ)を確保
+    var path=document.createElementNS(svgNS,"path");
+    path.setAttribute("d", arcPath(cx,cy,rOuter,rInner,a0,a1));
+    path.setAttribute("fill", "var(" + d.slot + ")");
+    path.setAttribute("stroke", strokeCol);
+    path.setAttribute("stroke-width","2");
+    var h=Math.floor(d.mins/60), m=d.mins%60;
+    var durLabel = (h>0? h+"時間":"") + (m>0? m+"分":"") || "0分";
+    var titleEl=document.createElementNS(svgNS,"title");
+    titleEl.textContent = d.name + "  " + d.start + "〜" + d.end + "(" + durLabel + ")";
+    path.appendChild(titleEl);
+    svg.appendChild(path);
+    angle += sweep;
+
+    var row=document.createElement("div");
+    row.className="row";
+    var pct = Math.round(d.mins/total*1000)/10;
+    row.innerHTML =
+      '<span class="swatch" style="background:var(' + d.slot + ')"></span>' +
+      '<span class="name">' + d.name + '</span>' +
+      '<span class="time">' + d.start + '〜' + d.end + '</span>' +
+      '<span class="dur">' + durLabel + '</span>';
+    legend.appendChild(row);
+  });
+})();
+
+(function(){
+  // 偏差値の推移(高1〜高3、各年4月・7月・12月時点)
+  var points = [
+    {label:"高1 4月",  short:"4",  year:"高1", val:49},
+    {label:"高1 7月",  short:"7",  year:"高1", val:39},
+    {label:"高1 12月", short:"12", year:"高1", val:45},
+    {label:"高2 4月",  short:"4",  year:"高2", val:51},
+    {label:"高2 7月",  short:"7",  year:"高2", val:55},
+    {label:"高2 12月", short:"12", year:"高2", val:62},
+    {label:"高3 4月",  short:"4",  year:"高3", val:63},
+    {label:"高3 7月",  short:"7",  year:"高3", val:73},
+    {label:"高3 12月", short:"12", year:"高3", val:70}
+  ];
+  var svgNS="http://www.w3.org/2000/svg";
+  var svg=document.getElementById("hensachiSvg");
+  var padL=34, padR=16, padT=18, padB=44;
+  var W=640, H=260;
+  var plotW = W-padL-padR, plotH = H-padT-padB;
+
+  var vals = points.map(function(p){return p.val;});
+  var rawMin = Math.min.apply(null, vals), rawMax = Math.max.apply(null, vals);
+  var yMin = Math.floor(rawMin/10)*10 - 10;
+  var yMax = Math.ceil(rawMax/10)*10 + 5;
+  yMin = Math.max(yMin, 0);
+
+  function xAt(i){ return padL + (plotW * i/(points.length-1)); }
+  function yAt(v){ return padT + plotH * (1 - (v-yMin)/(yMax-yMin)); }
+
+  function el(tag, attrs){
+    var e=document.createElementNS(svgNS, tag);
+    for(var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // grid lines + y labels (10刻み)
+  for(var g = Math.ceil(yMin/10)*10; g<=yMax; g+=10){
+    var gy = yAt(g);
+    svg.appendChild(el("line",{x1:padL,y1:gy,x2:W-padR,y2:gy,class:"grid-line"}));
+    var yl=el("text",{x:padL-8,y:gy+3,"text-anchor":"end",class:"axis-label"});
+    yl.textContent = g;
+    svg.appendChild(yl);
+  }
+
+  // x labels(月)+ 学年ラベル
+  points.forEach(function(p,i){
+    var lx=el("text",{x:xAt(i),y:H-padB+16,"text-anchor":"middle",class:"axis-label"});
+    lx.textContent = p.short;
+    svg.appendChild(lx);
+  });
+  ["高1","高2","高3"].forEach(function(yr, gi){
+    var midIdx = gi*3 + 1;
+    var yl=el("text",{x:xAt(midIdx),y:H-padB+32,"text-anchor":"middle",class:"year-label"});
+    yl.textContent = yr;
+    svg.appendChild(yl);
+  });
+
+  // line path
+  var d = points.map(function(p,i){ return (i===0?"M":"L") + xAt(i) + " " + yAt(p.val); }).join(" ");
+  svg.appendChild(el("path",{d:d,class:"line-path"}));
+
+  // points + hover title、start/min/max/最終値のみ直接ラベル
+  var minIdx = vals.indexOf(rawMin), maxIdx = vals.indexOf(rawMax);
+  points.forEach(function(p,i){
+    var cx=xAt(i), cy=yAt(p.val);
+    var callout = (i===0 || i===minIdx || i===maxIdx || i===points.length-1);
+    var c=el("circle",{cx:cx,cy:cy,r: callout?5:3.5,class: callout?"pt-callout":"pt"});
+    var t=el("title",{}); t.textContent = p.label + "  偏差値" + p.val;
+    c.appendChild(t);
+    svg.appendChild(c);
+    if(callout){
+      var above = p.val !== rawMin;
+      var lab=el("text",{x:cx,y: above? cy-12 : cy+18,"text-anchor":"middle",class:"val-label"});
+      lab.textContent = p.val;
+      svg.appendChild(lab);
+    }
+  });
+})();
+
+(function(){
+  // 指導中の生徒の偏差値推移(高1〜高3・7月まで確定、12月は指導継続中で未確定)
+  var points = [
+    {label:"高1 4月",  short:"4",  val:50},
+    {label:"高1 7月",  short:"7",  val:49},
+    {label:"高1 12月", short:"12", val:45},
+    {label:"高2 4月",  short:"4",  val:51},
+    {label:"高2 7月",  short:"7",  val:53},
+    {label:"高2 12月", short:"12", val:58},
+    {label:"高3 4月",  short:"4",  val:62},
+    {label:"高3 7月",  short:"7",  val:60}
+  ];
+  var svgNS="http://www.w3.org/2000/svg";
+  var svg=document.getElementById("studentHensachiSvg");
+  if(!svg) return;
+  var padL=30, padR=34, padT=16, padB=30;
+  var W=420, H=190;
+  var plotW = W-padL-padR, plotH = H-padT-padB;
+
+  var vals = points.map(function(p){return p.val;});
+  var rawMin = Math.min.apply(null, vals), rawMax = Math.max.apply(null, vals);
+  var yMin = Math.max(Math.floor(rawMin/10)*10 - 5, 0);
+  var yMax = Math.ceil(rawMax/10)*10 + 5;
+
+  // 12月(未確定)ぶんの余白を1点分とっておき、破線でつなぐ
+  var nSlots = points.length + 1;
+  function xAt(i){ return padL + (plotW * i/(nSlots-1)); }
+  function yAt(v){ return padT + plotH * (1 - (v-yMin)/(yMax-yMin)); }
+
+  function el(tag, attrs){
+    var e=document.createElementNS(svgNS, tag);
+    for(var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  for(var g = Math.ceil(yMin/10)*10; g<=yMax; g+=10){
+    var gy = yAt(g);
+    svg.appendChild(el("line",{x1:padL,y1:gy,x2:W-padR,y2:gy,class:"grid-line"}));
+    var yl=el("text",{x:padL-8,y:gy+3,"text-anchor":"end",class:"axis-label"});
+    yl.textContent = g;
+    svg.appendChild(yl);
+  }
+  points.forEach(function(p,i){
+    var lx=el("text",{x:xAt(i),y:H-padB+16,"text-anchor":"middle",class:"axis-label"});
+    lx.textContent = p.short;
+    svg.appendChild(lx);
+  });
+  var qx=el("text",{x:xAt(points.length),y:H-padB+16,"text-anchor":"middle",class:"axis-label"});
+  qx.textContent = "12(指導中)";
+  svg.appendChild(qx);
+
+  var d = points.map(function(p,i){ return (i===0?"M":"L") + xAt(i) + " " + yAt(p.val); }).join(" ");
+  svg.appendChild(el("path",{d:d,class:"line-path"}));
+
+  // 最終点から先は破線で「継続中」を示す
+  var lastX=xAt(points.length-1), lastY=yAt(points[points.length-1].val);
+  var dash=el("path",{d:"M "+lastX+" "+lastY+" L "+xAt(points.length)+" "+lastY, class:"line-path"});
+  dash.setAttribute("stroke-dasharray","4 4");
+  dash.setAttribute("opacity","0.5");
+  svg.appendChild(dash);
+  var qmark=el("text",{x:xAt(points.length),y:lastY-10,"text-anchor":"middle",class:"val-label"});
+  qmark.setAttribute("opacity","0.55");
+  qmark.textContent = "?";
+  svg.appendChild(qmark);
+
+  var minIdx = vals.indexOf(rawMin), maxIdx = vals.indexOf(rawMax);
+  points.forEach(function(p,i){
+    var cx=xAt(i), cy=yAt(p.val);
+    var callout = (i===0 || i===minIdx || i===points.length-1);
+    var c=el("circle",{cx:cx,cy:cy,r: callout?5:3.5,class: callout?"pt-callout":"pt"});
+    var t=el("title",{}); t.textContent = p.label + "  偏差値" + p.val;
+    c.appendChild(t);
+    svg.appendChild(c);
+    if(callout){
+      var above = p.val !== rawMin;
+      var lab=el("text",{x:cx,y: above? cy-12 : cy+18,"text-anchor":"middle",class:"val-label"});
+      lab.textContent = p.val;
+      svg.appendChild(lab);
+    }
+  });
+})();
+</script>
+
+</body></html>
